@@ -83,7 +83,7 @@ async def read_only_mode(message: types.Message):
     # await service_message.delete()
 
 # read-only holatdan qayta tiklaymiz
-@dp.message_handler(IsGroup(), Command("unro", prefixes="!/"), AdminFilter())
+@dp.message_handler(IsGroup(), Command("unro", prefixes="!"), AdminFilter())
 async def undo_read_only_mode(message: types.Message):
     member = message.reply_to_message.from_user
     member_id = member.id
@@ -99,15 +99,9 @@ async def undo_read_only_mode(message: types.Message):
         can_change_info=False,
         can_pin_messages=False,
     )
-    service_message = await message.reply("Xabar 5 sekunddan so'ng o'chib ketadi.")
-
-    await asyncio.sleep(5)
+    await message.delete()
     await message.chat.restrict(user_id=member_id, permissions=user_allowed, until_date=0)
     await message.reply(f"Foydalanuvchi {member.full_name} tiklandi")
-
-    # xabarlarni o'chiramiz
-    await message.delete()
-    await service_message.delete()
 
 # Foydalanuvchini banga yuborish (guruhdan haydash)
 @dp.message_handler(IsGroup(), Command("ban", prefixes="!"), AdminFilter())
