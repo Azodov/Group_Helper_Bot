@@ -99,7 +99,6 @@ async def undo_read_only_mode(message: types.Message):
         can_change_info=False,
         can_pin_messages=False,
     )
-    await message.delete()
     await message.chat.restrict(user_id=member_id, permissions=user_allowed, until_date=0)
     await message.reply(f"Foydalanuvchi {member.full_name} tiklandi")
 
