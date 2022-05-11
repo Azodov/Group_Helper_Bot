@@ -32,8 +32,7 @@ async def left_member(message: types.Message):
 async def read_only_mode(message: types.Message):
     member = message.reply_to_message.from_user
     member_id = member.id
-    chat_id = message.chat.id
-    command_parse = re.compile(r"(!ro|/ro) ?(\d+)? ?([\w+\D]+)?")
+    command_parse = re.compile(r"(!ro) ?(\d+)? ?([\w+\D]+)?")
     parsed = command_parse.match(message.text)
     time = parsed.group(2)
     comment = parsed.group(3)
@@ -72,7 +71,6 @@ async def read_only_mode(message: types.Message):
         await message.answer(f"Xatolik! {err.args}")
         return
 
-    # Пишем в чат
     await message.answer(f"Foydalanuvchi {message.reply_to_message.from_user.full_name} {time} minut yozish huquqidan mahrum qilindi.\n"
                          f"Sabab: \n<b>{comment}</b>")
 
@@ -87,7 +85,6 @@ async def read_only_mode(message: types.Message):
 async def undo_read_only_mode(message: types.Message):
     member = message.reply_to_message.from_user
     member_id = member.id
-    chat_id = message.chat.id
 
     user_allowed = types.ChatPermissions(
         can_send_messages=True,
@@ -100,34 +97,31 @@ async def undo_read_only_mode(message: types.Message):
         can_pin_messages=False,
     )
     await message.chat.restrict(user_id=member_id, permissions=user_allowed, until_date=0)
-    await message.reply(f"Foydalanuvchi {member.full_name} tiklandi")
+    await message.delete()
+    await message.answer(f"Foydalanuvchi {member.full_name} tiklandi")
 
 # Foydalanuvchini banga yuborish (guruhdan haydash)
 @dp.message_handler(IsGroup(), Command("ban", prefixes="!"), AdminFilter())
 async def ban_user(message: types.Message):
     member = message.reply_to_message.from_user
     member_id = member.id
-    chat_id = message.chat.id
+
+
+    command_parse = re.compile(r"(!ban) ?([\w+\D]+)?")
+    parsed = command_parse.match(message.text)
+    comment = parsed.group(2)
+
+
     await message.chat.kick(user_id=member_id)
-
-    await message.answer(f"Foydalanuvchi {message.reply_to_message.from_user.full_name} guruhdan haydaldi")
-    service_message = await message.reply("Xabar 5 sekunddan so'ng o'chib ketadi.")
-
-    await asyncio.sleep(5)
     await message.delete()
-    await service_message.delete()
+    await message.answer(f"Foydalanuvchi {message.reply_to_message.from_user.full_name} guruhdan haydaldi. \n"
+                         f"Sabab: \n<b>{comment}</b>")
 
 # Foydalanuvchini bandan chiqarish, foydalanuvchini guruhga qo'sha olmaymiz (o'zi qo'shilishi mumkin)
 @dp.message_handler(IsGroup(), Command("unban", prefixes="!"), AdminFilter())
 async def unban_user(message: types.Message):
     member = message.reply_to_message.from_user
     member_id = member.id
-    chat_id = message.chat.id
+    await message.delete()
     await message.chat.unban(user_id=member_id)
     await message.answer(f"Foydalanuvchi {message.reply_to_message.from_user.full_name} bandan chiqarildi")
-    service_message = await message.reply("Xabar 5 sekunddan so'ng o'chib ketadi.")
-
-    await asyncio.sleep(5)
-
-    await message.delete()
-    await service_message.delete()
